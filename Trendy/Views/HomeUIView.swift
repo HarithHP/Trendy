@@ -95,7 +95,6 @@ struct HomeUIView: View {
                         
                     }.padding(12).offset(x:60, y:100)
                     
-                    
                 }
                 
                 VStack{

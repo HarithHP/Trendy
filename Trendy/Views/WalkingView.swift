@@ -12,7 +12,6 @@ struct WalkingView: View {
         
         NavigationView{
             
-            
             ZStack{
                 
                 Color(red: 187/255, green: 138/255, blue: 82/255)
