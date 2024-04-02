@@ -8,33 +8,31 @@
 import SwiftUI
 
 struct HomeUIView: View {
-    var body: some View 
+    @State private var selectedIndex: Int = 1
+      
+      private let categories = ["All", "Newly", "Denim", "Shirts", "T-shirts", "others"]
+    @StateObject var cartManager = CartManager()
+
+    var body: some View
     {
         NavigationView{
             
             ZStack {
-        
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(Color.gray)
-                    .frame(width: 300, height: 50)
-                    .offset(x:-22,y:-250)
-                
-                Image(systemName:"line.3.horizontal.decrease.circle.fill")
-                    .resizable()
-                    .foregroundColor(Color(red: 187/255, green: 138/255, blue: 82/255))
-                    .scaledToFill()
-                    .edgesIgnoringSafeArea(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
-                    .frame(width:45 ,height:40).offset(x:160,y: -250)
-            
+                VStack{
+                    
+                    Search().offset(y:-120)
+                }
                 
                 VStack{
-                    Image(systemName:"bell.badge.fill")
-                        .resizable()
-                        .foregroundColor(.black)
-                        .scaledToFill()
-                        .edgesIgnoringSafeArea(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
-                        .frame(width:25 ,height:25)
-                        .offset(x:160, y:-238)
+                    NavigationLink
+                    {
+                        
+                        CartView().environmentObject(cartManager)
+                    }
+                label:
+                    {
+                        CartButton(numberOfProducts: cartManager.products.count)
+                    }.foregroundColor(.black).offset(x:170, y:-240)
                     
                     
                     Image(systemName:"contextualmenu.and.cursorarrow")    .resizable()
@@ -54,7 +52,7 @@ struct HomeUIView: View {
                     Text("Categories")
                         .font(.custom("AmericanTypewriter", size: 24))
                         .foregroundColor(Color(red: 187/255, green: 138/255, blue: 82/255)).bold()
-                        .frame(width: 308, height: 12).offset(x:-110,y:-55)
+                        .frame(width: 308, height: 12).offset(x:-110,y:-75)
                     
                 
                 }
@@ -83,32 +81,35 @@ struct HomeUIView: View {
                 }
                 
                 VStack{
-                    
-                    LazyHStack{
-                        Capsule().fill(.white).frame(width:110, height: 50).shadow(radius: 10)
-                        
-                        Capsule().fill(.white).frame(width:110, height: 50).shadow(radius: 10)
-                        
-                        Capsule().fill(.white).frame(width:110, height: 50).shadow(radius: /*@START_MENU_TOKEN@*/10/*@END_MENU_TOKEN@*/)
-                        
-                        Capsule().fill(.white).frame(width:110, height: 50).shadow(radius: 10)
-                        
-                    }.padding(12).offset(x:60, y:100)
-                    
-                }
+                    ScrollView (.horizontal, showsIndicators: false) {
+                        HStack {
+                            ForEach(0 ..< categories.count) { i in
+                                Button(action: {selectedIndex = i}) {
+                                    CategoryView(isActive: selectedIndex == i, text: categories[i])
+                                }
+                            }
+                        }
+                        .padding()
+                    }
+                }.offset(y:80)
+
                 
                 VStack{
-                    
-                    
-                    LazyHStack{
-                        Rectangle().fill(.white).frame(width:160, height: 180).shadow(radius: /*@START_MENU_TOKEN@*/10/*@END_MENU_TOKEN@*/)
+                    ScrollView(.horizontal, showsIndicators: false){
+                        HStack(spacing:15) {
+                            ForEach(productList, id: \.id) { product in
+                                ItemCard(product: product)
+                                    .environmentObject(cartManager)
+                            }
+                        }
                         
-                        Rectangle().fill(.white).frame(width:160, height: 180).shadow(radius: 10)
-                        
-                    }.padding(50).offset(y:240)
-                    
-                    
-                }
+                    }
+                }.offset(y:220).padding()
+                
+                VStack {
+                                   Spacer()
+                                   BottomNavBarView()
+                               }
             }
         }.navigationBarBackButtonHidden(true)
         
@@ -117,4 +118,49 @@ struct HomeUIView: View {
 
 #Preview {
     HomeUIView()
+}
+
+struct CategoryView: View {
+    let isActive: Bool
+    let text: String
+    var body: some View {
+        VStack (alignment: .leading, spacing: 0) {
+            Text(text)
+                .font(.system(size: 18))
+                .fontWeight(.medium)
+                .foregroundColor(isActive ? Color.brown : Color.black.opacity(0.5))
+            if (isActive) { Color("Primary")
+                .frame(width: 15, height: 2)
+                .clipShape(Capsule())
+            }
+        }
+        .padding(.trailing)
+    }
+}
+
+struct BottomNavBarView: View {
+    var body: some View {
+        HStack {
+            BottomNavBarItem(image: Image("home (2)"), action: {})
+            BottomNavBarItem(image: Image("heart"), action: {})
+            BottomNavBarItem(image: Image("shop"), action: {})
+            BottomNavBarItem(image: Image("User"), action: {})
+        }
+        .padding()
+        .background(Color.white)
+        .clipShape(Capsule())
+        .padding(.horizontal)
+        .shadow(color: Color.blue.opacity(0.15), radius: 8, x: 2, y: 6)
+    }
+}
+
+struct BottomNavBarItem: View {
+    let image: Image
+    let action: () -> Void
+    var body: some View {
+        Button(action: action) {
+            image
+                .frame(maxWidth: .infinity)
+        }
+    }
 }
